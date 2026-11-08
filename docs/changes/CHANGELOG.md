@@ -13,6 +13,12 @@
 
 ---
 
+## 2026-11-08 — 同步至 GitHub
+
+- 需求依据：用户要求将小程序相关代码同步到 GitHub
+- 改动：初始化 git；仓库 https://github.com/JasonTang123/wechat-miniprogram-photo-album ；`main` 已推送（首提交含 miniprogram 壳、Phase 1 需求、CHANGELOG、Cursor 规则）
+- 未做：未包含 Agent 仓库内 Skill/规则副本（仍在 `Desktop/Agent`）
+
 ## 2026-11-08 — 需求 v0.2：写入已决议 + 改前回顾流程
 
 - 需求依据：用户确认建议方案；要求 Cursor 每次改小程序前回顾需求与上次修改
