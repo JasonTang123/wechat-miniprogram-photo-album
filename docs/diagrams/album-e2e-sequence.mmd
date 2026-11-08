@@ -1,0 +1,78 @@
+%% 微信小程序电子相册 — 构建思路时序图
+%% 参与者：用户 / 小程序 / 相册API(复用阿里云ECS) / NAS / 百度网盘开放平台
+%% 路径约定：缩略图列表 → 按需原图；密钥与网盘 token 仅在服务端
+
+sequenceDiagram
+    autonumber
+    actor User as 用户
+    participant MP as 微信小程序
+    participant API as 相册 API<br/>(阿里云 ECS)
+    participant NAS as NAS<br/>/mnt/nas_download
+    participant BD as 百度网盘<br/>开放平台
+
+    Note over User,BD: 阶段 A · 一次性接入（构建期）
+
+    User->>MP: 注册小程序 / 配置 AppID
+    User->>API: 在现有 ECS 部署相册服务 + HTTPS 域名
+    User->>MP: 公众平台配置 request/downloadFile 合法域名
+    User->>BD: 开放平台实名、创建应用、配置 redirect_uri
+    User->>NAS: 约定相册根目录（只读挂载已存在）
+
+    Note over User,BD: 阶段 B · 登录与网盘授权
+
+    User->>MP: 打开小程序
+    MP->>MP: wx.login 取得 code
+    MP->>API: POST /auth/wx (code)
+    API-->>MP: session（openid 绑定）
+
+    opt 首次绑定百度网盘
+        MP->>API: 请求授权入口
+        API-->>MP: 百度 OAuth URL
+        User->>BD: 授权同意
+        BD->>API: redirect + code
+        API->>BD: code 换 access_token / refresh_token
+        API-->>API: 仅服务端安全存储 token
+    end
+
+    Note over User,BD: 阶段 C · 浏览相册（列表只用缩略图，保空间与流量）
+
+    User->>MP: 进入相册 / 选择来源 NAS 或 百度
+    MP->>API: GET /album/items?source=&cursor=
+
+    alt 来源 = NAS
+        API->>NAS: 列举目录元数据（path/mtime/size）
+        NAS-->>API: 文件列表
+        API->>NAS: 按需读原图生成/读缓存 thumb
+        NAS-->>API: 缩略图字节（可选缓存）
+    else 来源 = 百度网盘
+        API->>BD: imagelist (web=1)
+        BD-->>API: fs_id + thumbs 等元数据
+    end
+
+    API-->>MP: JSON（id、时间、thumbUrl 为本域 HTTPS）
+    MP-->>User: 网格展示缩略图
+
+    Note over User,BD: 阶段 D · 查看 / 保存原图（不改写 NAS/网盘原文件）
+
+    User->>MP: 点击某张照片
+    MP->>API: GET /album/original?id=（或短时签名 URL）
+
+    alt 来源 = NAS
+        API->>NAS: 只读打开原文件流
+        NAS-->>API: 原图像素字节
+    else 来源 = 百度网盘
+        API->>BD: filemetas(dlink=1)
+        BD-->>API: dlink
+        API->>BD: GET dlink + UA pan.baidu.com
+        BD-->>API: 原文件（可 302）
+    end
+
+    API-->>MP: 本域 HTTPS 原图流
+    MP-->>User: previewImage / 自定义预览
+
+    opt 保存到手机相册
+        User->>MP: 长按或点保存
+        MP->>MP: downloadFile(原图本域 URL)
+        MP->>MP: saveImageToPhotosAlbum
+        MP-->>User: 已保存（NAS/百度侧原文件未修改）
+    end

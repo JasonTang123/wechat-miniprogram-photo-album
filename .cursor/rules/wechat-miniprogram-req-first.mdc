@@ -1,0 +1,16 @@
+---
+description: 电子相册小程序改动前必须先回顾需求文档与 CHANGELOG
+alwaysApply: true
+---
+
+# 小程序改动：需求优先
+
+凡修改本项目（`Wechat mini programe`）内小程序、相册 API、索引脚本或相关文档时：
+
+1. **先读** `docs/requirements/phase1-requirements.md`（尤其 §0 已决议 R1–R7 与当前 Phase 范围）。
+2. **再读** `docs/changes/CHANGELOG.md` **最新一条**，弄清上次改了什么、刻意没做什么。
+3. 确认本次改动不突破 Phase 边界（Phase 1：**不**加载照片像素；权威源本机 `/Volumes/home/Dudu`；主页用 `photo_count_total` 等）。
+4. 实现完成后，在 `CHANGELOG.md` **顶部追加**新条目（需求依据 + 改动 + 未做/边界）。
+5. 若决议变更，先改需求文档 §0 / 修订记录，再改代码，并在 CHANGELOG 写明。
+
+禁止：未读需求与 CHANGELOG 就直接改 `miniprogram/` 或另起架构（例如擅自全量同步原图到云 NAS、就地 WebP 覆盖原件）。

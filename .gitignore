@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# 本地私有 / 密钥（勿提交 AppSecret）
+*.pem
+.env
+.env.*
+secrets/
+
+# 微信开发者工具本地缓存
+miniprogram_npm/
+node_modules/
+.idea/
+.vscode/
+
+# 可选：若含本机路径可忽略；当前 private 仅开关配置，允许提交
+# project.private.config.json

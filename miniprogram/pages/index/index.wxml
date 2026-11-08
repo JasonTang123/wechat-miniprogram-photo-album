@@ -1,0 +1,10 @@
+<view class="page">
+  <view class="hero">
+    <text class="title">电子相册</text>
+    <text class="subtitle">基础框架已就绪</text>
+  </view>
+  <view class="card">
+    <text class="line">当前为占位首页，暂无 NAS / 网盘业务。</text>
+    <text class="line">用微信开发者工具导入本项目后即可预览。</text>
+  </view>
+</view>
